@@ -3,7 +3,7 @@
 
 .page {
   width: 100%;
-  max-width: 1100px;
+  max-width: 980px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -38,6 +38,7 @@
 
 .subtitle {
   margin: 0;
+  max-width: 52rem;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text-secondary);
@@ -50,80 +51,100 @@
   flex-shrink: 0;
 }
 
-.settingsCard {
-  padding: 0;
-  overflow: visible;
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
-.mappingsHeader {
+.toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: $spacing-md;
-  padding: $spacing-md $spacing-lg;
-  border-bottom: 1px solid var(--border-color);
-
-  @include mobile {
-    padding-left: $spacing-md;
-    padding-right: $spacing-md;
-  }
 }
 
-.mappingsTitle {
+.toolbarTitle {
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.mappingsBody {
-  padding: $spacing-sm $spacing-lg $spacing-lg;
-
-  @include mobile {
-    padding-left: $spacing-md;
-    padding-right: $spacing-md;
-  }
+.toolbarHint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
 
-.mappingRow {
+.ruleCard {
+  padding: $spacing-md $spacing-lg $spacing-lg;
+  overflow: visible;
+}
+
+.ruleTop {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border-color);
-
-  &:last-child {
-    border-bottom: none;
-  }
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
 }
 
-.mappingMain {
+.ruleIndex {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.ruleGrid {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: $spacing-sm;
+  align-items: end;
+  gap: $spacing-md;
 
   @include mobile {
     grid-template-columns: 1fr;
   }
 }
 
-.mappingSeparator {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
-  text-align: center;
+}
+
+.arrow {
+  padding-bottom: 10px;
+  color: var(--text-tertiary);
+  font-size: 18px;
 
   @include mobile {
     display: none;
   }
 }
 
-.mappingMeta {
+.ruleMeta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: $spacing-md;
+  margin-top: $spacing-md;
 }
 
 .modeField {
-  min-width: 160px;
+  min-width: 148px;
 }
 
 .mappingAliasInput {

@@ -6,11 +6,14 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Select } from '@/components/ui/Select';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { IconX } from '@/components/ui/icons';
+import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
-import { useAuthStore, useNotificationStore } from '@/stores';
+import { useAuthStore, useModelsStore, useNotificationStore } from '@/stores';
 import { isModelMappingUnsupported, modelMappingApi } from '@/services/api/modelMapping';
 import type { ModelMappingMode, ModelMappingRule } from '@/types/modelMapping';
 import { generateId, getErrorMessage } from '@/utils/helpers';
+import { classifyModels } from '@/utils/models';
+import { GroupedModelSelect } from './GroupedModelSelect';
 import styles from './ModelMappingPage.module.scss';
 
 type DraftRule = ModelMappingRule & { id: string };
@@ -37,10 +40,20 @@ const createEmptyRule = (): DraftRule => ({
   forceMapping: true,
 });
 
+const inferModeFromMatch = (match: string, current: ModelMappingMode): ModelMappingMode => {
+  if (current === 'regex') return current;
+  return match.includes('*') ? 'wildcard' : 'exact';
+};
+
 export function ModelMappingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { showNotification } = useNotificationStore();
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
+  const apiBase = useAuthStore((state) => state.apiBase);
+  const models = useModelsStore((state) => state.models);
+  const modelsLoading = useModelsStore((state) => state.loading);
+  const fetchModels = useModelsStore((state) => state.fetchModels);
+  const resolveApiKeysForModels = useApiKeysForModels();
   const disableControls = connectionStatus !== 'connected';
 
   const [initialLoading, setInitialLoading] = useState(true);
@@ -50,12 +63,28 @@ export function ModelMappingPage() {
   const [baseline, setBaseline] = useState<ModelMappingRule[]>([]);
   const [rules, setRules] = useState<DraftRule[]>([createEmptyRule()]);
 
+  const otherLabel = useMemo(
+    () => (i18n.language?.toLowerCase().startsWith('zh') ? '其他' : 'Other'),
+    [i18n.language]
+  );
+  const modelGroups = useMemo(() => classifyModels(models, { otherLabel }), [models, otherLabel]);
+
+  const loadCatalog = useCallback(async () => {
+    if (connectionStatus !== 'connected' || !apiBase) return;
+    try {
+      const apiKeys = await resolveApiKeysForModels();
+      await fetchModels(apiBase, apiKeys[0]);
+    } catch {
+      // Keep the page usable with a free-text fallback when the catalog is unavailable.
+    }
+  }, [apiBase, connectionStatus, fetchModels, resolveApiKeysForModels]);
+
   const loadRules = useCallback(async () => {
     setInitialLoading(true);
     setLoadError(null);
     setUnsupported(false);
     try {
-      const next = await modelMappingApi.list();
+      const [next] = await Promise.all([modelMappingApi.list(), loadCatalog()]);
       setBaseline(next);
       setRules(next.length ? next.map((rule) => ({ ...rule, id: generateId() })) : [createEmptyRule()]);
     } catch (err) {
@@ -69,7 +98,7 @@ export function ModelMappingPage() {
     } finally {
       setInitialLoading(false);
     }
-  }, [t]);
+  }, [loadCatalog, t]);
 
   useEffect(() => {
     void loadRules();
@@ -105,7 +134,9 @@ export function ModelMappingPage() {
 
   const validRules = useMemo(
     () =>
-      rules.filter((rule) => rule.match.trim() && rule.target.trim()).map(({ id: _id, ...rule }) => rule),
+      rules
+        .filter((rule) => rule.match.trim() && rule.target.trim())
+        .map(({ id: _id, ...rule }) => rule),
     [rules]
   );
   const hasIncompleteRule = rules.some((rule) => {
@@ -115,9 +146,19 @@ export function ModelMappingPage() {
   });
   const canSave = !disableControls && !saving && !unsupported && isDirty && !hasIncompleteRule;
 
-  const updateRule = <K extends keyof ModelMappingRule>(index: number, key: K, value: ModelMappingRule[K]) => {
+  const updateRule = <K extends keyof ModelMappingRule>(
+    index: number,
+    key: K,
+    value: ModelMappingRule[K]
+  ) => {
     setRules((current) =>
-      current.map((rule, ruleIndex) => (ruleIndex === index ? { ...rule, [key]: value } : rule))
+      current.map((rule, ruleIndex) => {
+        if (ruleIndex !== index) return rule;
+        if (key === 'match' && typeof value === 'string') {
+          return { ...rule, match: value, mode: inferModeFromMatch(value, rule.mode) };
+        }
+        return { ...rule, [key]: value };
+      })
     );
   };
 
@@ -126,7 +167,9 @@ export function ModelMappingPage() {
   };
 
   const removeRule = (index: number) => {
-    setRules((current) => (current.length <= 1 ? [createEmptyRule()] : current.filter((_, i) => i !== index)));
+    setRules((current) =>
+      current.length <= 1 ? [createEmptyRule()] : current.filter((_, i) => i !== index)
+    );
   };
 
   const handleSave = async () => {
@@ -195,17 +238,40 @@ export function ModelMappingPage() {
           <EmptyState title={t('common.loading')} description={t('model_mapping.loading_desc')} />
         </Card>
       ) : (
-        <Card className={styles.settingsCard}>
-          <div className={styles.mappingsHeader}>
-            <div className={styles.mappingsTitle}>{t('model_mapping.rules_title')}</div>
+        <div className={styles.stack}>
+          <div className={styles.toolbar}>
+            <div>
+              <div className={styles.toolbarTitle}>{t('model_mapping.rules_title')}</div>
+              <div className={styles.toolbarHint}>
+                {modelsLoading
+                  ? t('model_mapping.catalog_loading')
+                  : t('model_mapping.catalog_count', { count: models.length })}
+              </div>
+            </div>
             <Button variant="secondary" size="sm" onClick={addRule} disabled={disableControls || saving}>
               {t('model_mapping.add_rule')}
             </Button>
           </div>
-          <div className={styles.mappingsBody}>
-            {rules.map((rule, index) => (
-              <div key={rule.id} className={styles.mappingRow}>
-                <div className={styles.mappingMain}>
+
+          {rules.map((rule, index) => (
+            <Card key={rule.id} className={styles.ruleCard}>
+              <div className={styles.ruleTop}>
+                <span className={styles.ruleIndex}>{index + 1}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeRule(index)}
+                  disabled={disableControls || saving || (rules.length <= 1 && !rule.match && !rule.target)}
+                  title={t('common.delete')}
+                  aria-label={t('common.delete')}
+                >
+                  <IconX size={14} />
+                </Button>
+              </div>
+
+              <div className={styles.ruleGrid}>
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>{t('model_mapping.match_label')}</span>
                   <input
                     className={`input ${styles.mappingAliasInput}`}
                     placeholder={t('model_mapping.match_placeholder')}
@@ -213,56 +279,56 @@ export function ModelMappingPage() {
                     onChange={(event) => updateRule(index, 'match', event.target.value)}
                     disabled={disableControls || saving}
                   />
-                  <span className={styles.mappingSeparator}>→</span>
-                  <input
-                    className={`input ${styles.mappingAliasInput}`}
-                    placeholder={t('model_mapping.target_placeholder')}
+                </label>
+                <div className={styles.arrow} aria-hidden>
+                  →
+                </div>
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>{t('model_mapping.target_label')}</span>
+                  <GroupedModelSelect
                     value={rule.target}
-                    onChange={(event) => updateRule(index, 'target', event.target.value)}
+                    onChange={(next) => updateRule(index, 'target', next)}
+                    groups={modelGroups}
+                    placeholder={t('model_mapping.target_placeholder')}
+                    searchPlaceholder={t('model_mapping.target_search')}
+                    emptyLabel={t('model_mapping.target_empty')}
+                    customLabel={t('model_mapping.target_custom')}
                     disabled={disableControls || saving}
+                    ariaLabel={t('model_mapping.target_label')}
                   />
-                </div>
-                <div className={styles.mappingMeta}>
-                  <div className={styles.modeField}>
-                    <Select
-                      value={rule.mode}
-                      options={modeOptions}
-                      onChange={(value) => updateRule(index, 'mode', value as ModelMappingMode)}
-                      disabled={disableControls || saving}
-                      ariaLabel={t('model_mapping.mode_label')}
-                      size="sm"
-                      fullWidth
-                    />
-                  </div>
-                  <ToggleSwitch
-                    label={t('model_mapping.enabled_label')}
-                    labelPosition="left"
-                    checked={rule.enabled}
-                    onChange={(value) => updateRule(index, 'enabled', value)}
-                    disabled={disableControls || saving}
-                  />
-                  <ToggleSwitch
-                    label={t('model_mapping.force_mapping_label')}
-                    labelPosition="left"
-                    checked={rule.forceMapping}
-                    onChange={(value) => updateRule(index, 'forceMapping', value)}
-                    disabled={disableControls || saving}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeRule(index)}
-                    disabled={disableControls || saving || (rules.length <= 1 && !rule.match && !rule.target)}
-                    title={t('common.delete')}
-                    aria-label={t('common.delete')}
-                  >
-                    <IconX size={14} />
-                  </Button>
-                </div>
+                </label>
               </div>
-            ))}
-          </div>
-        </Card>
+
+              <div className={styles.ruleMeta}>
+                <div className={styles.modeField}>
+                  <Select
+                    value={rule.mode}
+                    options={modeOptions}
+                    onChange={(value) => updateRule(index, 'mode', value as ModelMappingMode)}
+                    disabled={disableControls || saving}
+                    ariaLabel={t('model_mapping.mode_label')}
+                    size="sm"
+                    fullWidth
+                  />
+                </div>
+                <ToggleSwitch
+                  label={t('model_mapping.enabled_label')}
+                  labelPosition="left"
+                  checked={rule.enabled}
+                  onChange={(value) => updateRule(index, 'enabled', value)}
+                  disabled={disableControls || saving}
+                />
+                <ToggleSwitch
+                  label={t('model_mapping.force_mapping_label')}
+                  labelPosition="left"
+                  checked={rule.forceMapping}
+                  onChange={(value) => updateRule(index, 'forceMapping', value)}
+                  disabled={disableControls || saving}
+                />
+              </div>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
