@@ -155,7 +155,7 @@
     "force_mapping_label": "Вернуть исходное имя",
     "loading_desc": "Загрузка правил сопоставления моделей",
     "upgrade_required_title": "Нужно обновить сервер",
-    "upgrade_required_desc": "Эта сборка CLIProxyAPI ещё не отдаёт /v0/management/model-mapping."
+    "upgrade_required_desc": "Эта сборка CLIProxyAPI ещё не отдаёт /v8/management/routing/model-mapping."
   },
   "dashboard": {
     "hero_verdict_good": "Всё стабильно",

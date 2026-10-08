@@ -3,7 +3,8 @@ import type { ModelMappingMode, ModelMappingRule } from '@/types/modelMapping';
 
 type StatusError = { status?: number };
 
-const MODEL_MAPPING_ENDPOINT = '/model-mapping';
+// Relative to apiClient base `/v8/management`. Do not prefix that path again.
+const MODEL_MAPPING_ENDPOINT = '/routing/model-mapping';
 
 const getStatusCode = (err: unknown): number | undefined => {
   if (!err || typeof err !== 'object') return undefined;

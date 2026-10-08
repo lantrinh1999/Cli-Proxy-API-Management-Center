@@ -156,7 +156,7 @@
     "force_mapping_label": "回写原名",
     "loading_desc": "正在加载模型映射规则",
     "upgrade_required_title": "需要升级后端",
-    "upgrade_required_desc": "当前 CLIProxyAPI 尚未提供 /v0/management/model-mapping。"
+    "upgrade_required_desc": "当前 CLIProxyAPI 尚未提供 /v8/management/routing/model-mapping。"
   },
   "dashboard": {
     "hero_verdict_good": "运行平稳",

@@ -156,7 +156,7 @@
     "force_mapping_label": "Echo original name",
     "loading_desc": "Loading model mapping rules",
     "upgrade_required_title": "Backend upgrade required",
-    "upgrade_required_desc": "This CLIProxyAPI build does not expose /v0/management/model-mapping yet."
+    "upgrade_required_desc": "This CLIProxyAPI build does not expose /v8/management/routing/model-mapping yet."
   },
   "dashboard": {
     "hero_verdict_good": "All systems steady",
