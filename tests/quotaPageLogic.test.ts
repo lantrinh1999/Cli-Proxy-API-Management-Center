@@ -259,4 +259,36 @@ describe('sortQuotaEntries', () => {
     const sorted = sortQuotaEntries(entries, 'soonest', resolver({ [last]: 1 }));
     expect(paginate(sorted, 1, 2).pageItems[0].file.name).toBe(last);
   });
+
+  test("'type' puts Plus ahead of Free and sinks unknown plans", () => {
+    const typed: QuotaFileEntry[] = [
+      { file: file('codex-free.json', 'codex', { plan_type: 'free' }), type: 'codex' },
+      { file: file('codex-plus.json', 'codex', { plan_type: 'plus' }), type: 'codex' },
+      { file: file('claude-a.json', 'claude'), type: 'claude' },
+      { file: file('codex-pro.json', 'codex', { plan_type: 'pro' }), type: 'codex' },
+    ];
+    expect(byName(sortQuotaEntries(typed, 'type', () => null))).toEqual([
+      'codex-pro.json',
+      'codex-plus.json',
+      'codex-free.json',
+      'claude-a.json',
+    ]);
+  });
+
+  test("'type' falls back to the file-name plan suffix", () => {
+    const typed: QuotaFileEntry[] = [
+      {
+        file: file('codex-abc-user@x.com-free.json', 'codex', { email: 'user@x.com' }),
+        type: 'codex',
+      },
+      {
+        file: file('codex-abc-user@x.com-plus.json', 'codex', { email: 'user@x.com' }),
+        type: 'codex',
+      },
+    ];
+    expect(byName(sortQuotaEntries(typed, 'type', () => null))).toEqual([
+      'codex-abc-user@x.com-plus.json',
+      'codex-abc-user@x.com-free.json',
+    ]);
+  });
 });

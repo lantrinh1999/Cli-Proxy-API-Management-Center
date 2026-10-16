@@ -359,6 +359,7 @@
     "sort_default": "Default",
     "sort_az": "A-Z Name",
     "sort_priority": "Priority",
+    "sort_type": "Type (Plus/Free)",
     "priority_display": "Priority",
     "weight_display": "WRR weight",
     "page_size_label": "Per page",
@@ -1618,6 +1619,7 @@
     "sort_label": "Sort",
     "sort_default": "Default",
     "sort_soonest": "Soonest recovery",
+    "sort_type": "Type (Plus/Free)",
     "meta_credentials": "{{count}} credentials",
     "meta_loaded": "{{count}} loaded",
     "meta_attention": "{{count}} need attention",
@@ -1710,7 +1712,78 @@
     "invalid_json": "Enter valid JSON",
     "expected_array": "Enter a JSON array",
     "expected_object": "Enter a JSON object",
-    "invalid_enum": "Choose one of the declared enum values"
+    "invalid_enum": "Choose one of the declared enum values",
+    "ch_relay_vippro": {
+      "errors": {
+        "base_url": "Enter an https address, or http only for localhost and a private IP. Do not include a username, query, or fragment.",
+        "prefix": "The prefix cannot contain a slash.",
+        "headers": "Headers must be a JSON object. Authorization and Host are not allowed.",
+        "request_retry": "Enter a whole number from 0 to 32. Leave empty to use the default of 3.",
+        "fallback_retry": "Enter a whole number from 0 to 3. Leave empty to disable fallback.",
+        "sticky_seconds": "Enter a whole number from 0 to 86400. Leave empty to use the default of 300.",
+        "rotation": "Choose a rotation mode.",
+        "plus": "Choose off, prefer, or only.",
+        "models": "The model list is invalid.",
+        "model_name": "A row with an alias must also have a model name."
+      },
+      "fields": {
+        "enabled": {
+          "label": "Enabled",
+          "hint": "When this is off, the plugin claims no models and rejects every request."
+        },
+        "base-url": {
+          "label": "Upstream address",
+          "hint": "OpenAI-compatible base URL. Public hosts must use HTTPS. HTTP is allowed only for localhost and private IPs such as 192.168.8.1. Leave empty to use the built-in default."
+        },
+        "prefix": {
+          "label": "Model prefix",
+          "hint": "Prefix added in front of the client model. If the value still contains a slash, the plugin claims no models."
+        },
+        "headers": {
+          "label": "Extra headers",
+          "hint": "Headers sent upstream. $NAME copies the client header of that name. $CPA-SESSION-ID uses the request session. A missing source omits the header."
+        },
+        "request-retry": {
+          "label": "Account retries",
+          "hint": "Extra attempts shared by switching accounts and upstream model names. 0 sends once. Default 3. Maximum 32. An overload hidden in an HTTP 200 response uses this budget to try the next account."
+        },
+        "fallback-retry": {
+          "label": "Model fallback retries",
+          "hint": "Extra attempts that switch to the fallback list when the upstream says the model is not supported. 0 disables fallback even if a list is filled in. Maximum 3. These calls do not spend the account retry budget."
+        },
+        "rotation-mode": {
+          "label": "Account rotation",
+          "hint": "How the plugin picks the next Codex account.",
+          "options": {
+            "round-robin": "Round robin",
+            "fill-first": "Keep the first account",
+            "least-recent": "Least recently used",
+            "sticky": "Sticky session"
+          }
+        },
+        "plus-preference": {
+          "label": "Plus preference",
+          "hint": "Plus is the ChatGPT plan inside the account token. A stale plan_type of plus on the file is ignored when the token says free. While any enabled Plus account exists, prefer and only do not use free, pro, team, or go.",
+          "options": {
+            "off": "All Codex accounts",
+            "prefer": "Plus first, others only if no Plus exists",
+            "only": "Plus only"
+          }
+        },
+        "sticky-seconds": {
+          "label": "Sticky duration",
+          "hint": "Seconds a sticky session keeps the account that succeeded. Default 300. An overload clears that bind."
+        },
+        "stats-file": {
+          "label": "Stats file",
+          "hint": "JSON file of hourly request and token counts kept for 90 days. Leave empty to skip writing a file."
+        },
+        "models": {
+          "label": "Models",
+          "hint": "Each row is an upstream model name, an optional client alias, and an optional fallback list. Rows that share an alias form one pool."
+        }
+      }
+    }
   },
   "plugin_store": {
     "title": "Plugin Store",
@@ -1937,7 +2010,9 @@
       "invalidRange": "Minimum thinking budget must not exceed the maximum. Blank bounds count as 0.",
       "removeModel": "Remove model",
       "modelName": "Model name",
-      "modelAlias": "Alias (optional)"
+      "modelAlias": "Alias (optional)",
+      "fallbackModels": "Fallback models",
+      "fallbackHint": "Optional upstream names, in order. Separate with commas. Empty means no fallback."
     },
     "runtimePolicy": {
       "title": "Advanced runtime policy",

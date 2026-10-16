@@ -41,7 +41,7 @@ export function PluginResourcePage() {
 
   const connected = connectionStatus === 'connected';
   const pluginID = useMemo(() => safeDecodeURIComponent(params.pluginId), [params.pluginId]);
-  const menuIndex = useMemo(() => parseMenuIndex(params.menuIndex), [params.menuIndex]);
+  const menuIndex = useMemo(() => parseMenuIndex(params.menuIndex ?? '0'), [params.menuIndex]);
 
   const loadResource = useCallback(async () => {
     if (!connected) {

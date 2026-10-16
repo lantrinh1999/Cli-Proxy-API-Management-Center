@@ -201,6 +201,84 @@ describe('sortAuthFiles', () => {
     ]);
   });
 
+  test("'type' puts Plus ahead of Free, then by primary identity", () => {
+    const files = [
+      authFile({ name: 'codex-a-free.json', email: 'z@x.com', plan_type: 'free' }),
+      authFile({ name: 'codex-b-plus.json', email: 'a@x.com', plan_type: 'plus' }),
+      authFile({ name: 'codex-c-plus.json', email: 'm@x.com', plan_type: 'plus' }),
+      authFile({ name: 'codex-d-pro.json', email: 'p@x.com', plan_type: 'pro' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-d-pro.json',
+      'codex-b-plus.json',
+      'codex-c-plus.json',
+      'codex-a-free.json',
+    ]);
+  });
+
+  test("'type' reads plan from the file-name suffix when plan_type is absent", () => {
+    const files = [
+      authFile({ name: 'codex-abc-user@x.com-free.json', email: 'user@x.com' }),
+      authFile({ name: 'codex-abc-user@x.com-plus.json', email: 'user@x.com' }),
+      authFile({ name: 'kimi-9.json', type: 'kimi' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-abc-user@x.com-plus.json',
+      'codex-abc-user@x.com-free.json',
+      'kimi-9.json',
+    ]);
+  });
+
+  test("'type' sinks credentials without a recognizable plan", () => {
+    const files = [
+      authFile({ name: 'bare.json' }),
+      authFile({ name: 'codex-plus.json', plan_type: 'plus' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-plus.json',
+      'bare.json',
+    ]);
+  });
+
+  test("'type' puts Plus ahead of Free, then by primary identity", () => {
+    const files = [
+      authFile({ name: 'codex-a-free.json', email: 'z@x.com', plan_type: 'free' }),
+      authFile({ name: 'codex-b-plus.json', email: 'a@x.com', plan_type: 'plus' }),
+      authFile({ name: 'codex-c-plus.json', email: 'm@x.com', plan_type: 'plus' }),
+      authFile({ name: 'codex-d-pro.json', email: 'p@x.com', plan_type: 'pro' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-d-pro.json',
+      'codex-b-plus.json',
+      'codex-c-plus.json',
+      'codex-a-free.json',
+    ]);
+  });
+
+  test("'type' reads plan from the file-name suffix when plan_type is absent", () => {
+    const files = [
+      authFile({ name: 'codex-abc-user@x.com-free.json', email: 'user@x.com' }),
+      authFile({ name: 'codex-abc-user@x.com-plus.json', email: 'user@x.com' }),
+      authFile({ name: 'kimi-9.json', type: 'kimi' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-abc-user@x.com-plus.json',
+      'codex-abc-user@x.com-free.json',
+      'kimi-9.json',
+    ]);
+  });
+
+  test("'type' sinks credentials without a recognizable plan", () => {
+    const files = [
+      authFile({ name: 'bare.json' }),
+      authFile({ name: 'codex-plus.json', plan_type: 'plus' }),
+    ];
+    expect(sortAuthFiles(files, 'type').map((file) => file.name)).toEqual([
+      'codex-plus.json',
+      'bare.json',
+    ]);
+  });
+
   test('returns a new array and leaves the input untouched', () => {
     const files = [authFile({ name: 'b.json' }), authFile({ name: 'a.json' })];
     const result = sortAuthFiles(files, 'az');

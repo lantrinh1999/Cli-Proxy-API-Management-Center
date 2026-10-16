@@ -32,18 +32,38 @@ const normalizePluginOAuthProvider = (value: unknown): string | undefined => {
   return isManagementOAuthProviderKey(provider) ? provider : undefined;
 };
 
+const firstDefined = (record: Record<string, unknown>, keys: string[]): unknown => {
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null) return value;
+  }
+  return undefined;
+};
+
+const firstFieldList = (record: Record<string, unknown>): unknown => {
+  const keys = ['config_fields', 'ConfigFields', 'configFields'];
+  for (const key of keys) {
+    if (Array.isArray(record[key]) && (record[key] as unknown[]).length > 0) return record[key];
+  }
+  for (const key of keys) {
+    if (Array.isArray(record[key])) return record[key];
+  }
+  return undefined;
+};
+
 const normalizeConfigField = (value: unknown): PluginConfigField | null => {
   if (!isRecord(value)) return null;
-  const name = asString(value.name).trim();
+  const name = asString(firstDefined(value, ['name', 'Name'])).trim();
   if (!name) return null;
-  const enumValues = Array.isArray(value.enum_values)
-    ? value.enum_values.map((item) => asString(item)).filter(Boolean)
+  const enumRaw = firstDefined(value, ['enum_values', 'EnumValues', 'enumValues']);
+  const enumValues = Array.isArray(enumRaw)
+    ? enumRaw.map((item) => asString(item)).filter(Boolean)
     : [];
   return {
     name,
-    type: asString(value.type).trim() || 'string',
+    type: asString(firstDefined(value, ['type', 'Type'])).trim() || 'string',
     enumValues,
-    description: asString(value.description).trim(),
+    description: asString(firstDefined(value, ['description', 'Description'])).trim(),
   };
 };
 
@@ -54,12 +74,14 @@ const normalizeConfigFields = (value: unknown): PluginConfigField[] =>
 
 const normalizeMetadata = (value: unknown): PluginMetadata | null => {
   if (!isRecord(value)) return null;
-  const name = asString(value.name).trim();
-  const version = asString(value.version).trim();
-  const author = asString(value.author).trim();
-  const githubRepository = asString(value.github_repository).trim();
-  const logo = asString(value.logo).trim();
-  const configFields = normalizeConfigFields(value.config_fields);
+  const name = asString(firstDefined(value, ['name', 'Name'])).trim();
+  const version = asString(firstDefined(value, ['version', 'Version'])).trim();
+  const author = asString(firstDefined(value, ['author', 'Author'])).trim();
+  const githubRepository = asString(
+    firstDefined(value, ['github_repository', 'GitHubRepository', 'githubRepository'])
+  ).trim();
+  const logo = asString(firstDefined(value, ['logo', 'Logo'])).trim();
+  const configFields = normalizeConfigFields(firstFieldList(value));
 
   if (!name && !version && !author && !githubRepository && !logo && configFields.length === 0) {
     return null;
@@ -94,11 +116,11 @@ const normalizeMenus = (value: unknown): PluginMenu[] =>
 
 const normalizePluginEntry = (value: unknown): PluginListEntry | null => {
   if (!isRecord(value)) return null;
-  const id = asString(value.id).trim();
+  const id = asString(firstDefined(value, ['id', 'ID'])).trim();
   if (!id) return null;
 
-  const metadata = normalizeMetadata(value.metadata);
-  const configFields = normalizeConfigFields(value.config_fields);
+  const metadata = normalizeMetadata(firstDefined(value, ['metadata', 'Metadata']));
+  const configFields = normalizeConfigFields(firstFieldList(value));
   const supportsOAuth = asBoolean(value.supports_oauth);
   const oauthProvider = normalizePluginOAuthProvider(value.oauth_provider);
   const quotaProvider = asString(value.quota_provider).trim().toLowerCase();

@@ -359,6 +359,7 @@
     "sort_default": "기본",
     "sort_az": "이름 (A-Z)",
     "sort_priority": "우선순위",
+    "sort_type": "유형 (Plus/Free)",
     "priority_display": "우선순위",
     "weight_display": "WRR 가중치",
     "page_size_label": "페이지당",
@@ -1618,6 +1619,7 @@
     "sort_label": "정렬",
     "sort_default": "기본값",
     "sort_soonest": "가장 빠른 복구순",
+    "sort_type": "유형 (Plus/Free)",
     "meta_credentials": "자격 증명 {{count}}개",
     "meta_loaded": "{{count}}개 로드됨",
     "meta_attention": "{{count}}개 주의 필요",
@@ -1710,7 +1712,78 @@
     "invalid_json": "유효한 JSON을 입력하세요",
     "expected_array": "JSON 배열을 입력하세요",
     "expected_object": "JSON 객체를 입력하세요",
-    "invalid_enum": "선언된 열거형 값 중 하나를 선택하세요"
+    "invalid_enum": "선언된 열거형 값 중 하나를 선택하세요",
+    "ch_relay_vippro": {
+      "errors": {
+        "base_url": "https 주소를 입력하세요. http는 localhost와 사설 IP만 허용됩니다. 사용자 이름, 쿼리, fragment는 넣을 수 없습니다.",
+        "prefix": "접두사에는 슬래시를 넣을 수 없습니다.",
+        "headers": "헤더는 JSON 객체여야 합니다. Authorization과 Host는 허용되지 않습니다.",
+        "request_retry": "0에서 32 사이의 정수를 입력하세요. 비우면 기본값 3을 사용합니다.",
+        "fallback_retry": "0에서 3 사이의 정수를 입력하세요. 비우면 대체하지 않습니다.",
+        "sticky_seconds": "0에서 86400 사이의 정수를 입력하세요. 비우면 기본값 300을 사용합니다.",
+        "rotation": "계정 순환 방식을 선택하세요.",
+        "plus": "off, prefer 또는 only를 선택하세요.",
+        "models": "모델 목록이 올바르지 않습니다.",
+        "model_name": "별칭이 있는 행에는 모델 이름이 있어야 합니다."
+      },
+      "fields": {
+        "enabled": {
+          "label": "플러그인 사용",
+          "hint": "끄면 플러그인이 모델을 등록하지 않고 모든 요청을 거절합니다."
+        },
+        "base-url": {
+          "label": "업스트림 주소",
+          "hint": "OpenAI 호환 주소입니다. 공개 호스트는 HTTPS여야 합니다. HTTP는 localhost와 192.168.8.1 같은 사설 IP에서만 허용됩니다. 비우면 기본 주소를 사용합니다."
+        },
+        "prefix": {
+          "label": "모델 접두사",
+          "hint": "클라이언트 모델 이름 앞에 붙는 접두사입니다. 값에 슬래시가 남아 있으면 플러그인이 모델을 등록하지 않습니다."
+        },
+        "headers": {
+          "label": "추가 헤더",
+          "hint": "업스트림으로 보내는 헤더입니다. $NAME은 같은 이름의 클라이언트 헤더를 복사합니다. $CPA-SESSION-ID는 요청 세션을 사용합니다. 출처가 없으면 그 헤더는 보내지 않습니다."
+        },
+        "request-retry": {
+          "label": "계정 재시도",
+          "hint": "계정 전환과 업스트림 모델 이름 전환이 함께 쓰는 추가 횟수입니다. 0이면 한 번만 보냅니다. 기본값 3. 최대 32. HTTP 200 응답에 숨은 과부하도 이 횟수로 다음 계정을 시도합니다."
+        },
+        "fallback-retry": {
+          "label": "모델 대체 횟수",
+          "hint": "업스트림이 모델을 지원하지 않는다고 하면 대체 목록으로 바꾸는 추가 횟수입니다. 0이면 목록을 적어도 대체하지 않습니다. 최대 3. 이 호출은 계정 재시도 횟수를 쓰지 않습니다."
+        },
+        "rotation-mode": {
+          "label": "계정 순환",
+          "hint": "다음 요청에 쓸 Codex 계정을 고르는 방식입니다.",
+          "options": {
+            "round-robin": "라운드 로빈",
+            "fill-first": "첫 계정 유지",
+            "least-recent": "가장 오래 쓰지 않은 계정",
+            "sticky": "세션 고정"
+          }
+        },
+        "plus-preference": {
+          "label": "Plus 우선",
+          "hint": "Plus는 계정 토큰 안의 ChatGPT 요금제입니다. 토큰이 free이면 파일의 오래된 plan_type plus는 무시됩니다. 켜진 Plus 계정이 하나라도 있으면 prefer와 only는 free, pro, team, go를 쓰지 않습니다.",
+          "options": {
+            "off": "모든 Codex 계정",
+            "prefer": "Plus 우선, Plus가 없을 때만 다른 계정",
+            "only": "Plus만"
+          }
+        },
+        "sticky-seconds": {
+          "label": "세션 유지 시간",
+          "hint": "고정 세션이 성공한 계정을 유지하는 초입니다. 기본값 300. 과부하가 나면 그 연결을 해제합니다."
+        },
+        "stats-file": {
+          "label": "통계 파일",
+          "hint": "요청 수와 토큰을 시간 단위로 90일 동안 저장하는 JSON 파일입니다. 비우면 파일을 쓰지 않습니다."
+        },
+        "models": {
+          "label": "모델",
+          "hint": "각 행은 업스트림 모델 이름, 선택적 클라이언트 별칭, 선택적 대체 목록입니다. 별칭이 같은 행은 한 묶음입니다."
+        }
+      }
+    }
   },
   "plugin_store": {
     "title": "플러그인 스토어",
@@ -1937,7 +2010,9 @@
       "invalidRange": "최소 사고 예산은 최댓값을 초과할 수 없습니다. 비어 있는 경계는 0으로 간주됩니다.",
       "removeModel": "모델 삭제",
       "modelName": "모델 이름",
-      "modelAlias": "별칭(선택 사항)"
+      "modelAlias": "별칭(선택 사항)",
+      "fallbackModels": "대체 모델",
+      "fallbackHint": "선택적 업스트림 모델 이름(순서대로). 쉼표로 구분합니다. 비우면 대체하지 않습니다."
     },
     "runtimePolicy": {
       "title": "고급 런타임 정책",

@@ -4,6 +4,7 @@
  */
 
 import type { AuthFileItem } from '@/types';
+import { comparePlanTypes, resolveAuthFilePlanType } from '@/features/authFiles/logic';
 import { ANTIGRAVITY_CONFIG } from './providers/antigravity/data';
 import { CLAUDE_CONFIG } from './providers/claude/data';
 import { CODEX_CONFIG } from './providers/codex/data';
@@ -82,17 +83,20 @@ export function filterEntriesBySearch(entries: QuotaFileEntry[], search: string)
 }
 
 /**
- * Order the grid by whichever credential recovers first.
+ * Order the grid by recovery time or ChatGPT plan type.
  *
- * The instant is injected rather than read here: quota lives in the store and
- * arrives asynchronously, and keeping this function store-free is what makes
- * the ordering rules directly testable.
+ * The recovery instant is injected rather than read here: quota lives in the
+ * store and arrives asynchronously, and keeping this function store-free is
+ * what makes the ordering rules directly testable.
  *
  * Credentials with no instant — not loaded yet, failed, or reporting no
  * upcoming reset — sink to the bottom rather than sorting as "now". They keep
  * their incoming provider-grouped order, so the unloaded tail still reads like
  * the default view instead of an arbitrary shuffle. Because loading is
  * click-to-fetch, that tail is most of the list until the user asks for data.
+ *
+ * `type` mode ranks Plus/Pro ahead of Free from auth-file plan fields (with a
+ * filename-suffix fallback). Unknown plans sink last; original index breaks ties.
  *
  * The original index is the final tiebreak, making stability an asserted
  * property rather than an assumption about the engine's sort.
@@ -102,6 +106,21 @@ export function sortQuotaEntries(
   mode: QuotaSortMode,
   resolveNextRecoveryMs: (entry: QuotaFileEntry) => number | null
 ): QuotaFileEntry[] {
+  if (mode === 'default') return [...entries];
+
+  if (mode === 'type') {
+    return entries
+      .map((entry, index) => ({
+        entry,
+        index,
+        plan: resolveAuthFilePlanType(entry.file),
+      }))
+      .sort(
+        (a, b) => comparePlanTypes(a.plan, b.plan) || a.index - b.index
+      )
+      .map((decorated) => decorated.entry);
+  }
+
   if (mode !== 'soonest') return [...entries];
 
   // Decorate once — resolving pokes at provider-shaped state per entry.

@@ -1,4 +1,4 @@
-export const AUTH_FILES_SORT_MODES = ['default', 'az', 'priority'] as const;
+export const AUTH_FILES_SORT_MODES = ['default', 'az', 'priority', 'type'] as const;
 export const AUTH_FILES_STATUS_FILTER_MODES = [
   'all',
   'enabled',

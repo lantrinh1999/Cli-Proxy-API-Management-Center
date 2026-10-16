@@ -139,6 +139,8 @@ export interface ModelEntryInput extends ModelOptionsInput {
   sourceIndex?: number | null;
   name: string;
   alias?: string;
+  /** Plugin rows only. Comma-separated upstream fallback model names. */
+  fallbackText?: string;
   priority?: number;
   image?: boolean;
   /** Original backend value, preserved until the standard-level selector is changed. */

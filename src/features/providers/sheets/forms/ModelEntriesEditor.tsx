@@ -16,6 +16,8 @@ interface ModelEntriesEditorProps {
   supportsImage: boolean;
   /** Every backend provider model can override its thinking capability. */
   supportsThinking: boolean;
+  /** Plugin model rows can list upstream fallback names. */
+  showFallback?: boolean;
   mutating: boolean;
   removeDisabled: boolean;
   onUpdate: (idx: number, patch: Partial<ModelEntryInput>) => void;
@@ -29,6 +31,7 @@ export function ModelEntriesEditor({
   providerBrand = 'gemini',
   supportsImage,
   supportsThinking,
+  showFallback = false,
   mutating,
   removeDisabled,
   onUpdate,
@@ -131,6 +134,24 @@ export function ModelEntriesEditor({
                 </button>
               </div>
             </div>
+            {showFallback ? (
+              <label className={styles.field}>
+                <span className={styles.label}>
+                  {t('providersPage.modelOptions.fallbackModels')}
+                </span>
+                <input
+                  className={styles.input}
+                  value={entry.fallbackText ?? ''}
+                  placeholder="other-model, backup-model"
+                  aria-label={t('providersPage.modelOptions.fallbackModels')}
+                  disabled={mutating}
+                  onChange={(event) => onUpdate(idx, { fallbackText: event.target.value })}
+                />
+                <span className={styles.labelHint}>
+                  {t('providersPage.modelOptions.fallbackHint')}
+                </span>
+              </label>
+            ) : null}
             {expanded ? (
               <div className={styles.modelEntryDetails}>
                 {!oauthAliasOnly && supportsImage ? (

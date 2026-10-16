@@ -63,6 +63,11 @@ describe('quota ui state', () => {
     expect(readQuotaUiState()).toEqual({ tab: 'kimi', sortMode: 'soonest' });
   });
 
+  test('accepts the type sort mode', () => {
+    writeQuotaUiState({ tab: 'codex', sortMode: 'type' });
+    expect(readQuotaUiState()).toEqual({ tab: 'codex', sortMode: 'type' });
+  });
+
   test('rejects values that are not part of the current contract', () => {
     storage.setItem(KEY, JSON.stringify({ tab: 'not-a-tab', sortMode: 'by-vibes' }));
     expect(readQuotaUiState()).toEqual({ tab: undefined, sortMode: undefined });

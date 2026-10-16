@@ -357,6 +357,7 @@
     "sort_default": "預設",
     "sort_az": "A-Z 名稱",
     "sort_priority": "優先順序",
+    "sort_type": "類型 (Plus/Free)",
     "priority_display": "優先順序",
     "weight_display": "WRR 權重",
     "page_size_label": "單頁數量",
@@ -1645,6 +1646,7 @@
     "sort_label": "排序",
     "sort_default": "預設",
     "sort_soonest": "最快恢復優先",
+    "sort_type": "類型 (Plus/Free)",
     "meta_credentials": "{{count}} 個憑證",
     "meta_loaded": "{{count}} 個已載入",
     "meta_attention": "{{count}} 個需關注",
@@ -1737,7 +1739,78 @@
     "invalid_json": "請輸入有效 JSON",
     "expected_array": "請輸入 JSON 陣列",
     "expected_object": "請輸入 JSON 物件",
-    "invalid_enum": "請選擇宣告的枚舉值"
+    "invalid_enum": "請選擇宣告的枚舉值",
+    "ch_relay_vippro": {
+      "errors": {
+        "base_url": "請輸入 https 位址；只有 localhost 和內網 IP 可以使用 http。不要包含使用者名稱、查詢參數或片段。",
+        "prefix": "前綴不能包含斜線。",
+        "headers": "標頭必須是 JSON 物件。不能設定 Authorization 或 Host。",
+        "request_retry": "請輸入 0 到 32 的整數。留空則使用預設值 3。",
+        "fallback_retry": "請輸入 0 到 3 的整數。留空則不回退。",
+        "sticky_seconds": "請輸入 0 到 86400 的整數。留空則使用預設值 300。",
+        "rotation": "請選擇一種帳號輪換方式。",
+        "plus": "請選擇 off、prefer 或 only。",
+        "models": "模型清單無效。",
+        "model_name": "有別名的列必須填寫模型名稱。"
+      },
+      "fields": {
+        "enabled": {
+          "label": "啟用外掛",
+          "hint": "關閉後，外掛不宣告任何模型，並拒絕所有請求。"
+        },
+        "base-url": {
+          "label": "上游位址",
+          "hint": "相容 OpenAI 的位址。公開主機必須使用 HTTPS。只有 localhost 和內網 IP（例如 192.168.8.1）可以使用 HTTP。留空則使用內建預設位址。"
+        },
+        "prefix": {
+          "label": "模型前綴",
+          "hint": "加在用戶端模型名稱前面的前綴。如果值裡仍然包含斜線，外掛不會宣告任何模型。"
+        },
+        "headers": {
+          "label": "附加標頭",
+          "hint": "送給上游的標頭。$NAME 複製用戶端同名標頭。$CPA-SESSION-ID 使用這次請求的工作階段。找不到來源時不送出該標頭。"
+        },
+        "request-retry": {
+          "label": "更換帳號次數",
+          "hint": "切換帳號和上游模型名稱共用的額外次數。0 表示只送出一次。預設 3。最大 32。藏在 HTTP 200 回應裡的過載錯誤也會用這次數嘗試下一個帳號。"
+        },
+        "fallback-retry": {
+          "label": "模型回退次數",
+          "hint": "上游表示模型不受支援時，改用回退清單的額外次數。填 0 則即使寫了清單也不回退。最大 3。這些呼叫不占用更換帳號次數。"
+        },
+        "rotation-mode": {
+          "label": "帳號輪換",
+          "hint": "外掛如何為下一次請求選擇 Codex 帳號。",
+          "options": {
+            "round-robin": "輪詢",
+            "fill-first": "始終使用第一個帳號",
+            "least-recent": "最久未使用",
+            "sticky": "依工作階段保持"
+          }
+        },
+        "plus-preference": {
+          "label": "Plus 優先",
+          "hint": "Plus 是帳號權杖裡的 ChatGPT 方案。權杖顯示 free 時，檔案上過期的 plan_type plus 會被忽略。只要還有啟用的 Plus 帳號，prefer 和 only 都不會使用 free、pro、team 或 go。",
+          "options": {
+            "off": "全部 Codex 帳號",
+            "prefer": "優先 Plus，沒有 Plus 才用其他帳號",
+            "only": "僅 Plus"
+          }
+        },
+        "sticky-seconds": {
+          "label": "工作階段保持時間",
+          "hint": "黏性工作階段保持成功帳號的秒數。預設 300。遇到過載會清除這個綁定。"
+        },
+        "stats-file": {
+          "label": "統計檔案",
+          "hint": "按小時保存請求和 token 數量的 JSON 檔案，保留 90 天。留空則不寫檔。"
+        },
+        "models": {
+          "label": "模型",
+          "hint": "每一列是上游模型名稱、可選的用戶端別名，以及可選的回退清單。別名相同的列屬於同一組。"
+        }
+      }
+    }
   },
   "plugin_store": {
     "title": "插件商店",
@@ -1964,7 +2037,9 @@
       "invalidRange": "最小思考預算不能大於最大值，留空的邊界按 0 處理。",
       "removeModel": "移除模型",
       "modelName": "模型名稱",
-      "modelAlias": "別名（選填）"
+      "modelAlias": "別名（選填）",
+      "fallbackModels": "回退模型",
+      "fallbackHint": "可選的上游模型名稱，依序。以逗號分隔。留空表示不回退。"
     },
     "runtimePolicy": {
       "title": "進階執行策略",

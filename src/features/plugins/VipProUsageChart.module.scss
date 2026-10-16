@@ -1,0 +1,13 @@
+.series {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.swatchTokens {
+  background: var(--primary-color);
+}
+
+.segmentTokens {
+  background: var(--primary-color);
+}

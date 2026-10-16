@@ -313,6 +313,7 @@
     "sort_default": "Mặc định",
     "sort_az": "Tên A-Z",
     "sort_priority": "Ưu tiên",
+    "sort_type": "Loại (Plus/Free)",
     "priority_display": "Ưu tiên",
     "weight_display": "Trọng số WRR",
     "page_size_label": "Mỗi trang",
@@ -1569,6 +1570,7 @@
     "sort_label": "Sắp xếp",
     "sort_default": "Mặc định",
     "sort_soonest": "Sớm khôi phục nhất",
+    "sort_type": "Loại (Plus/Free)",
     "meta_credentials": "{{count}} credential",
     "meta_loaded": "{{count}} đã tải",
     "meta_attention": "{{count}} cần chú ý",
@@ -1666,7 +1668,78 @@
     "invalid_json": "Nhập JSON hợp lệ",
     "expected_array": "Nhập mảng JSON",
     "expected_object": "Nhập đối tượng JSON",
-    "invalid_enum": "Chọn một trong các giá trị enum đã khai báo"
+    "invalid_enum": "Chọn một trong các giá trị enum đã khai báo",
+    "ch_relay_vippro": {
+      "errors": {
+        "base_url": "Nhập địa chỉ https, hoặc http chỉ với localhost và IP nội bộ. Không kèm tài khoản, query hay fragment.",
+        "prefix": "Tiền tố không được chứa dấu gạch chéo.",
+        "headers": "Header phải là JSON object. Không được đặt Authorization hoặc Host.",
+        "request_retry": "Nhập số nguyên từ 0 đến 32. Để trống sẽ dùng mặc định 3.",
+        "fallback_retry": "Nhập số nguyên từ 0 đến 3. Để trống là không fallback.",
+        "sticky_seconds": "Nhập số nguyên từ 0 đến 86400. Để trống sẽ dùng mặc định 300.",
+        "rotation": "Chọn một cách xoay tài khoản.",
+        "plus": "Chọn off, prefer hoặc only.",
+        "models": "Danh sách model không hợp lệ.",
+        "model_name": "Dòng có alias phải có tên model."
+      },
+      "fields": {
+        "enabled": {
+          "label": "Bật plugin",
+          "hint": "Khi tắt, plugin không nhận model nào và từ chối mọi request."
+        },
+        "base-url": {
+          "label": "Địa chỉ upstream",
+          "hint": "Địa chỉ tương thích OpenAI. Host công khai phải dùng HTTPS. HTTP chỉ dùng cho localhost và IP nội bộ, ví dụ 192.168.8.1. Để trống thì dùng địa chỉ mặc định."
+        },
+        "prefix": {
+          "label": "Tiền tố model",
+          "hint": "Tiền tố đứng trước model phía client. Nếu giá trị còn dấu gạch chéo, plugin không nhận model nào."
+        },
+        "headers": {
+          "label": "Header bổ sung",
+          "hint": "Header gửi lên upstream. $NAME chép header cùng tên từ client. $CPA-SESSION-ID dùng phiên của request. Không có nguồn thì header đó không được gửi."
+        },
+        "request-retry": {
+          "label": "Số lần đổi tài khoản",
+          "hint": "Số lần thử thêm, dùng chung khi đổi tài khoản và đổi tên model upstream. 0 là gửi một lần. Mặc định 3. Tối đa 32. Lỗi quá tải nằm trong phản hồi HTTP 200 cũng dùng ngân sách này để thử tài khoản kế tiếp."
+        },
+        "fallback-retry": {
+          "label": "Số lần đổi model dự phòng",
+          "hint": "Số lần thử thêm bằng danh sách model dự phòng khi upstream báo model không được hỗ trợ. 0 là không đổi model dù đã điền danh sách. Tối đa 3. Các lần này không trừ vào số lần đổi tài khoản."
+        },
+        "rotation-mode": {
+          "label": "Cách xoay tài khoản",
+          "hint": "Cách plugin chọn tài khoản Codex cho request tiếp theo.",
+          "options": {
+            "round-robin": "Xoay vòng",
+            "fill-first": "Giữ tài khoản đầu tiên",
+            "least-recent": "Tài khoản lâu chưa dùng",
+            "sticky": "Giữ theo phiên"
+          }
+        },
+        "plus-preference": {
+          "label": "Ưu tiên Plus",
+          "hint": "Plus là gói ChatGPT nằm trong token. Chữ plan_type plus cũ trên file bị bỏ qua khi token ghi free. Còn tài khoản Plus đang bật thì prefer và only không dùng free, pro, team hay go.",
+          "options": {
+            "off": "Mọi tài khoản Codex",
+            "prefer": "Plus trước, tài khoản khác chỉ khi không còn Plus",
+            "only": "Chỉ Plus"
+          }
+        },
+        "sticky-seconds": {
+          "label": "Thời gian giữ phiên",
+          "hint": "Số giây một phiên sticky giữ tài khoản đã thành công. Mặc định 300. Lỗi quá tải sẽ bỏ liên kết đó."
+        },
+        "stats-file": {
+          "label": "File thống kê",
+          "hint": "File JSON lưu số request và token theo giờ trong 90 ngày. Để trống thì không ghi file."
+        },
+        "models": {
+          "label": "Model",
+          "hint": "Mỗi dòng là tên model upstream, alias tùy chọn và danh sách model dự phòng. Các dòng cùng alias thuộc một nhóm."
+        }
+      }
+    }
   },
   "plugin_store": {
     "title": "Cửa hàng Plugin",
@@ -2186,7 +2259,9 @@
       "invalidRange": "Ngân sách suy nghĩ tối thiểu không được vượt quá mức tối đa. Giới hạn để trống được tính là 0.",
       "removeModel": "Xóa model",
       "modelName": "Tên model",
-      "modelAlias": "Bí danh (tùy chọn)"
+      "modelAlias": "Bí danh (tùy chọn)",
+      "fallbackModels": "Model dự phòng",
+      "fallbackHint": "Tên model upstream tùy chọn, theo thứ tự. Cách nhau bằng dấu phẩy. Để trống nghĩa là không dự phòng."
     },
     "runtimePolicy": {
       "title": "Chính sách thực thi nâng cao",

@@ -4,7 +4,7 @@
  */
 
 import type { AuthFileItem } from '@/types';
-import { isPluginQuotaFile, resolveAuthProvider } from '@/utils/quota';
+import { isPluginQuotaFile, resolveAuthProvider, resolveCodexPlanType } from '@/utils/quota';
 import {
   QUOTA_PROVIDER_TYPES,
   getAuthFileStatusMessage,
@@ -12,10 +12,66 @@ import {
   type AuthFileQuotaFilter,
   type QuotaProviderType,
 } from './constants';
-import { deriveAuthFileIdentity } from './identity';
+import { deriveAuthFileIdentity, stripJsonExtension } from './identity';
 import type { AuthFilesSortMode } from './uiState';
 
 const escapeWildcardSearchSegment = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Filename suffix whitelist for codex-<hash>-<email>-<plan>.json when plan_type fields are absent. */
+const KNOWN_PLAN_NAME_SUFFIXES = new Set([
+  'free',
+  'plus',
+  'team',
+  'pro',
+  'prolite',
+  'pro-lite',
+  'pro_lite',
+  'enterprise',
+  'go',
+]);
+
+/**
+ * Paid / higher tiers first so Plus clusters above Free.
+ * Unknown / missing plan sinks to the end.
+ */
+const PLAN_TYPE_RANK: Record<string, number> = {
+  pro: 0,
+  prolite: 1,
+  'pro-lite': 1,
+  pro_lite: 1,
+  plus: 2,
+  team: 3,
+  enterprise: 4,
+  go: 5,
+  free: 6,
+};
+
+const UNKNOWN_PLAN_RANK = 100;
+
+/** Prefer auth-file plan fields; fall back to a known trailing plan segment in the file name. */
+export const resolveAuthFilePlanType = (file: AuthFileItem): string | null => {
+  const fromFields = resolveCodexPlanType(file);
+  if (fromFields) return fromFields;
+
+  const base = stripJsonExtension(typeof file.name === 'string' ? file.name : '');
+  const dash = base.lastIndexOf('-');
+  if (dash < 0) return null;
+  const suffix = base.slice(dash + 1).trim().toLowerCase();
+  return KNOWN_PLAN_NAME_SUFFIXES.has(suffix) ? suffix : null;
+};
+
+/** Shared by Auth Files + Quota sort-by-type. Lower = earlier (Plus before Free). */
+export const planTypeRank = (planType: string | null): number => {
+  if (!planType) return UNKNOWN_PLAN_RANK;
+  return PLAN_TYPE_RANK[planType] ?? UNKNOWN_PLAN_RANK - 1;
+};
+
+/** Compare two plan labels: rank first, then alphabetical. */
+export const comparePlanTypes = (a: string | null, b: string | null): number => {
+  const rankCompare = planTypeRank(a) - planTypeRank(b);
+  if (rankCompare !== 0) return rankCompare;
+  return (a ?? '').localeCompare(b ?? '');
+};
 
 /** 不含 '*' 时返回 null（走 includes 路径）。刻意不加 ^/$ 锚点——保持子串语义。 */
 export const buildWildcardSearch = (value: string): RegExp | null => {
@@ -92,6 +148,17 @@ export const sortAuthFiles = (files: AuthFileItem[], mode: AuthFilesSortMode): A
       const pb = typeof b.priority === 'number' ? b.priority : 0;
       return pb - pa; // 高优先级排前面
     });
+  } else if (mode === 'type') {
+    // Codex ChatGPT plan type: Plus / Pro ahead of Free; unknown last.
+    // Decorate once — resolveCodexPlanType walks nested token fields.
+    const plans = new Map(copy.map((file) => [file, resolveAuthFilePlanType(file)]));
+    const primaries = new Map(copy.map((file) => [file, deriveAuthFileIdentity(file).primary]));
+    copy.sort(
+      (a, b) =>
+        comparePlanTypes(plans.get(a) ?? null, plans.get(b) ?? null) ||
+        (primaries.get(a) ?? '').localeCompare(primaries.get(b) ?? '') ||
+        a.name.localeCompare(b.name)
+    );
   }
   return copy;
 };

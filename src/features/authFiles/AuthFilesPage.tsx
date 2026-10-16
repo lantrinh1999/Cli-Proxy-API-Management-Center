@@ -424,6 +424,7 @@ export function AuthFilesPage() {
       { value: 'default', label: t('auth_files.sort_default') },
       { value: 'az', label: t('auth_files.sort_az') },
       { value: 'priority', label: t('auth_files.sort_priority') },
+      { value: 'type', label: t('auth_files.sort_type') },
     ],
     [t]
   );

@@ -33,6 +33,8 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   ...(supportsPlugin
     ? [
         { path: '/plugin-pages/:pluginId/:menuIndex', element: <PluginResourcePage /> },
+        { path: '/plugins/:pluginId/:menuIndex', element: <PluginResourcePage /> },
+        { path: '/plugins/:pluginId', element: <PluginResourcePage /> },
         { path: '/plugins', element: <PluginsPage /> },
         { path: '/plugin-store', element: <PluginStorePage /> },
         { path: '/plugins/*', element: <Navigate to="/plugins" replace /> },

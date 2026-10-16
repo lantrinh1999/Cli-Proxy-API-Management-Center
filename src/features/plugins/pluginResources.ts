@@ -21,8 +21,10 @@ export interface PluginResourceEntry {
 export const getPluginTitle = (plugin: PluginListEntry) =>
   plugin.metadata?.name.trim() || plugin.id;
 
-export const buildPluginResourceRoute = (pluginID: string, menuIndex: number) =>
-  `/plugin-pages/${encodeURIComponent(pluginID)}/${menuIndex}`;
+export const buildPluginResourceRoute = (pluginID: string, menuIndex: number) => {
+  const id = encodeURIComponent(pluginID);
+  return menuIndex === 0 ? `/plugins/${id}` : `/plugins/${id}/${menuIndex}`;
+};
 
 export const resolvePluginAssetURL = (value: string, apiBase: string) => {
   const trimmed = value.trim();
