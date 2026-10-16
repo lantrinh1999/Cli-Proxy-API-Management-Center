@@ -411,7 +411,9 @@ function parsePayloadParamValue(raw: unknown): { valueType: PayloadParamValueTyp
 }
 
 function parseRawPayloadParamValue(raw: unknown): string {
-  if (typeof raw === 'string') return raw;
+  // Raw rules store YAML strings, but the editor validates every raw value with JSON.parse.
+  // Quote strings so "auto" round-trips instead of blocking save as invalid JSON.
+  if (typeof raw === 'string') return JSON.stringify(raw);
 
   try {
     const json = JSON.stringify(raw, null, 2);

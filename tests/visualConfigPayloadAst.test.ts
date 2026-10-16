@@ -77,6 +77,39 @@ function retainAndEditRule(rules: PayloadRule[], raw: boolean): PayloadRule[] {
   ];
 }
 
+describe('raw payload string values', () => {
+  test('loads a plain string as JSON so the panel can save', () => {
+    function Harness() {
+      const visualConfig = useVisualConfig();
+      const [phase, setPhase] = useState(0);
+      if (phase === 0) {
+        visualConfig.loadVisualValuesFromYaml(`requests:
+  payload:
+    override-raw:
+      - models:
+          - name: '*'
+        params:
+          reasoning.summary: auto
+`);
+        setPhase(1);
+        return null;
+      }
+      const param = visualConfig.visualValues.payloadOverrideRawRules[0]?.params[0];
+      return createElement(
+        'pre',
+        null,
+        JSON.stringify({
+          value: param?.value,
+          invalid: visualConfig.visualHasPayloadValidationErrors,
+        })
+      );
+    }
+
+    const output = unwrapPre(renderToStaticMarkup(createElement(Harness)));
+    expect(JSON.parse(output)).toEqual({ value: '"auto"', invalid: false });
+  });
+});
+
 describe('visual config payload YAML AST updates', () => {
   const ruleSections = [
     ['default', 'payloadDefaultRules', false],
