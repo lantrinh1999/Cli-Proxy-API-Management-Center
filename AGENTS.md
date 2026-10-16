@@ -1,5 +1,18 @@
 # Repository Guidelines
 
+## Custom fork
+
+This checkout is the custom panel on `feat/model-mapping`, paired with `../CLIProxyAPI` on the same branch. Read that repo's Fork rule before syncing upstream or deploying. Push only when asked, to `origin` (`lantrinh1999/Cli-Proxy-API-Management-Center`), using the `lantrinh1999` GitHub account rather than `6c696e68`.
+
+Keep these flows when rebasing onto `upstream/main`. Take the new layout; do not restore the old page shell.
+
+- Model Mapping tab uses `/v8/management/routing/model-mapping` and the grouped searchable target select.
+- Auth Files and Quota sort by plan: Plus/Pro before Free, filename-suffix fallback, unknown last.
+- Plugin config stays in `PluginConfigSheet`, including `ch-relay-vippro` model editing and validation. Do not inline that editor back into `PluginsPage`.
+- Plugin menus open `/plugins/:pluginId` through `PluginResourcePage`. Do not mount `VipProPage` in `MainRoutes`. VipPro stats stay `GET /v0/management/ch-relay-vippro/stats` and `POST /v0/management/ch-relay-vippro/accounts/check`.
+- New translation keys go in all six locales. `bun run verify` must pass before a `management.html` deploy.
+- The router artifact is `dist/index.html` copied to `/root/.cliproxyapi/static/management.html` on `192.168.8.1`. Do not overwrite router `config.yaml` or auth. `disable-auto-update-panel` is already true.
+
 ## Project Scope & Structure
 
 This is a React 19 + TypeScript + Vite management frontend for CLI Proxy API, not the proxy itself. It exclusively uses the backend v8 Management API under `/v8/management` and the v8 configuration layout; do not add v0 fallbacks or legacy config adapters. Plugin resources and custom HTTP extensions are exceptions: preserve their backend-declared paths. The one sanctioned v0 touchpoint is `src/services/api/legacyBackendProbe.ts`: after a v8 login 404 it only detects an outdated backend to show a clearer error, and must never supply application data or act as a login fallback.
