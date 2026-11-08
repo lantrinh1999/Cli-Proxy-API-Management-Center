@@ -32,6 +32,13 @@ export interface PluginMenu {
   description: string;
 }
 
+/** 插件为某个登录入口单独发布的展示信息。 */
+export interface PluginOAuthProviderEntry {
+  identifier: string;
+  name?: string;
+  logo?: string;
+}
+
 export interface PluginListEntry {
   id: string;
   path: string;
@@ -41,6 +48,9 @@ export interface PluginListEntry {
   effectiveEnabled: boolean;
   supportsOAuth: boolean;
   oauthProvider?: string;
+  /** 声明的全部登录入口；旧后端只发单个 `oauth_provider` 时为空。 */
+  oauthProviders?: string[];
+  oauthProviderEntries?: PluginOAuthProviderEntry[];
   supportsQuota: boolean;
   quotaProvider?: string;
   logo: string;
