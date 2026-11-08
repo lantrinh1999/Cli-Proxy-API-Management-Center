@@ -1716,6 +1716,7 @@
     "ch_relay_vippro": {
       "errors": {
         "base_url": "Enter an https address, or http only for localhost, a private IP, and shared addresses in 100.64.0.0/10 (Tailscale). Do not include a username, query, or fragment.",
+        "fallback_base_url": "The fallback must be an https address, or http only for localhost, a private IP, and shared addresses in 100.64.0.0/10 (Tailscale). Do not include a username, query, or fragment.",
         "prefix": "The prefix cannot contain a slash.",
         "headers": "Headers must be a JSON object. Authorization and Host are not allowed.",
         "request_retry": "Enter a whole number from 0 to 32. Leave empty to use the default of 3. The plugin clamps other values.",
@@ -1738,6 +1739,10 @@
         "base-url": {
           "label": "Upstream address",
           "hint": "OpenAI-compatible base URL. Public hosts must use HTTPS. HTTP is allowed only for localhost, private IPs such as 192.168.8.1, and shared addresses such as 100.64.0.0/10 (Tailscale). Leave empty to use the built-in default."
+        },
+        "fallback-base-url": {
+          "label": "Upstream address fallback",
+          "hint": "Optional second OpenAI-compatible base URL. Used only when the main upstream address returns 404 or a server error (5xx), or cannot be reached. Same HTTPS and private-HTTP rules as the main address. Leave empty to disable."
         },
         "prefix": {
           "label": "Model prefix",

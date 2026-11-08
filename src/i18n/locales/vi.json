@@ -1672,6 +1672,7 @@
     "ch_relay_vippro": {
       "errors": {
         "base_url": "Nhập địa chỉ https, hoặc http chỉ với localhost, IP nội bộ và dải dùng chung 100.64.0.0/10 (Tailscale). Không kèm tài khoản, query hay fragment.",
+        "fallback_base_url": "Địa chỉ dự phòng phải là https, hoặc http chỉ với localhost, IP nội bộ và dải dùng chung 100.64.0.0/10 (Tailscale). Không kèm tài khoản, query hay fragment.",
         "prefix": "Tiền tố không được chứa dấu gạch chéo.",
         "headers": "Header phải là JSON object. Không được đặt Authorization hoặc Host.",
         "request_retry": "Nhập số nguyên từ 0 đến 32. Để trống sẽ dùng mặc định 3.",
@@ -1694,6 +1695,10 @@
         "base-url": {
           "label": "Địa chỉ upstream",
           "hint": "Địa chỉ tương thích OpenAI. Host công khai phải dùng HTTPS. HTTP chỉ dùng cho localhost, IP nội bộ (ví dụ 192.168.8.1) và dải dùng chung 100.64.0.0/10 (Tailscale). Để trống thì dùng địa chỉ mặc định."
+        },
+        "fallback-base-url": {
+          "label": "Địa chỉ upstream dự phòng",
+          "hint": "Địa chỉ tương thích OpenAI thứ hai, không bắt buộc. Chỉ dùng khi địa chỉ upstream chính trả về 404, lỗi máy chủ (5xx) hoặc không kết nối được. Cùng quy tắc HTTPS và HTTP nội bộ như địa chỉ chính. Để trống để tắt."
         },
         "prefix": {
           "label": "Tiền tố model",

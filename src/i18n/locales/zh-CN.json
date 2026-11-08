@@ -1715,6 +1715,7 @@
     "ch_relay_vippro": {
       "errors": {
         "base_url": "请输入 https 地址；只有 localhost、内网 IP 和共享地址 100.64.0.0/10（Tailscale）可以使用 http。不要包含用户名、查询参数或片段。",
+        "fallback_base_url": "备用地址必须是 https；只有 localhost、内网 IP 和共享地址 100.64.0.0/10（Tailscale）可以使用 http。不要包含用户名、查询参数或片段。",
         "prefix": "前缀不能包含斜杠。",
         "headers": "请求头必须是 JSON 对象。不能设置 Authorization 或 Host。",
         "request_retry": "请输入 0 到 32 的整数。留空则使用默认值 3。",
@@ -1737,6 +1738,10 @@
         "base-url": {
           "label": "上游地址",
           "hint": "兼容 OpenAI 的地址。公网主机必须使用 HTTPS。只有 localhost、内网 IP（例如 192.168.8.1）和共享地址 100.64.0.0/10（Tailscale）可以使用 HTTP。留空则使用内置默认地址。"
+        },
+        "fallback-base-url": {
+          "label": "上游备用地址",
+          "hint": "可选的第二个兼容 OpenAI 的地址。仅当主上游地址返回 404、服务器错误（5xx）或无法连接时使用。HTTPS 和私有 HTTP 规则与主地址相同。留空则关闭。"
         },
         "prefix": {
           "label": "模型前缀",

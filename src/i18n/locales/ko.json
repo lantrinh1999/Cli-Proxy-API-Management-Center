@@ -1716,6 +1716,7 @@
     "ch_relay_vippro": {
       "errors": {
         "base_url": "https 주소를 입력하세요. http는 localhost, 사설 IP, 100.64.0.0/10 공유 주소(Tailscale)만 허용됩니다. 사용자 이름, 쿼리, fragment는 넣을 수 없습니다.",
+        "fallback_base_url": "대체 주소는 https여야 합니다. http는 localhost, 사설 IP, 100.64.0.0/10 공유 주소(Tailscale)만 허용됩니다. 사용자 이름, 쿼리, fragment는 넣을 수 없습니다.",
         "prefix": "접두사에는 슬래시를 넣을 수 없습니다.",
         "headers": "헤더는 JSON 객체여야 합니다. Authorization과 Host는 허용되지 않습니다.",
         "request_retry": "0에서 32 사이의 정수를 입력하세요. 비우면 기본값 3을 사용합니다.",
@@ -1738,6 +1739,10 @@
         "base-url": {
           "label": "업스트림 주소",
           "hint": "OpenAI 호환 주소입니다. 공개 호스트는 HTTPS여야 합니다. HTTP는 localhost, 192.168.8.1 같은 사설 IP, 100.64.0.0/10 공유 주소(Tailscale)에서만 허용됩니다. 비우면 기본 주소를 사용합니다."
+        },
+        "fallback-base-url": {
+          "label": "업스트림 대체 주소",
+          "hint": "선택 사항인 두 번째 OpenAI 호환 주소입니다. 기본 업스트림 주소가 404, 서버 오류(5xx)를 반환하거나 연결할 수 없을 때만 사용합니다. HTTPS와 사설 HTTP 규칙은 기본 주소와 같습니다. 비우면 사용하지 않습니다."
         },
         "prefix": {
           "label": "모델 접두사",

@@ -6,6 +6,7 @@ const ROTATION_MODES = ['round-robin', 'fill-first', 'least-recent', 'sticky'];
 const PLUS_PREFERENCES = ['off', 'prefer', 'only', 'ignore'];
 const FIELD_NAMES = [
   'base-url',
+  'fallback-base-url',
   'prefix',
   'headers',
   'request-retry',
@@ -52,6 +53,8 @@ const baseURLError = (value: string) => {
   if (parsed.protocol === 'http:' && privateHost(parsed.hostname)) return '';
   return 'base_url';
 };
+
+const fallbackBaseURLError = (value: string) => (baseURLError(value) ? 'fallback_base_url' : '');
 
 const integerError = (value: string, min: number, max: number, key: string) => {
   if (!value) return '';
@@ -160,6 +163,7 @@ export function validateChRelayVipPro(
   };
 
   set('base-url', baseURLError(textOf(values, 'base-url')));
+  set('fallback-base-url', fallbackBaseURLError(textOf(values, 'fallback-base-url')));
   const prefix = textOf(values, 'prefix').replace(/^\/+|\/+$/g, '');
   if (prefix.includes('/')) set('prefix', 'prefix');
   set('headers', headersError(textOf(values, 'headers')));
